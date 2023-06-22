@@ -1,0 +1,75 @@
+class Node
+{
+private:
+    std::shared_ptr<rclcpp_action::ServerGoalHandle<action_interface::action::Cmd>> goalHandler;
+public:
+    std::shared_ptr<Node> next{nullptr};
+    std::shared_ptr<Node> prev{nullptr};
+
+
+    explicit Node(std::shared_ptr<rclcpp_action::ServerGoalHandle<action_interface::action::Cmd>>& goal) : goalHandler{goal}{}
+
+    std::shared_ptr<rclcpp_action::ServerGoalHandle<action_interface::action::Cmd>>& GetGoal()
+    {
+        return goalHandler;
+    }
+
+    Node(const Node& node)
+    {
+        goalHandler = node.goalHandler;
+        next = node.next;
+        prev = node.prev;
+    }
+};
+
+class LinkedList
+{
+private:
+    std::shared_ptr<Node> _head{nullptr};
+    std::shared_ptr<Node> _tail{nullptr};
+    int _size{0};
+
+public:
+
+    int GetSize()const{return _size;}
+
+    void Push_back(std::shared_ptr<rclcpp_action::ServerGoalHandle<action_interface::action::Cmd>>& goal)
+    {
+        auto newNode = std::make_shared<Node>(goal);
+        _size++;
+
+        if(_head)
+        {
+            _tail->prev = newNode;
+            newNode->next = _tail;
+            _tail = std::move(newNode);
+            return;
+        }
+
+        _head = std::move(newNode);
+        _tail = _head;
+    }
+
+    void Pop_back()
+    {
+        std::shared_ptr<Node> node(_head);
+        int size = _size;
+        while(size)
+        {
+            std::cout << node->GetGoal() << '\n';
+            node = node->prev;
+            size--;
+        }
+    }
+
+    void PrintList()
+    {
+        std::shared_ptr<Node> node(_head);
+
+        while(node)
+        {
+            std::cout << node->GetData() << '\n';
+            node = node->prev;
+        }
+    }
+};
